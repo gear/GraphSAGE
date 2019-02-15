@@ -15,6 +15,7 @@ from graphsage.neigh_samplers import UniformNeighborSampler
 from graphsage.utils import load_data
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 # Set random seed
 seed = 123
