@@ -16,7 +16,7 @@ minor = version_info[1]
 WALK_LEN=5
 N_WALKS=50
 
-def load_data(prefix, normalize=True, load_walks=False):
+def load_data(prefix, feats_suf, normalize=True, load_walks=False):
     G_data = json.load(open(prefix + "-G.json"))
     G = json_graph.node_link_graph(G_data)
     if isinstance(G.nodes()[0], int):
@@ -24,8 +24,11 @@ def load_data(prefix, normalize=True, load_walks=False):
     else:
         conversion = lambda n : n
 
-    if os.path.exists(prefix + "-feats.npy"):
+    if len(feats_suf) == 0 and os.path.exists(prefix + "-feats.npy"):
         feats = np.load(prefix + "-feats.npy")
+    elif os.path.exists(prefix+"-feats-"+feats_suf+".npy"):
+        print("Load an alternate feature set {}".format(feats_suf))
+        feats = np.load(prefix+"-feats-"+feats_suf+".npy")
     else:
         print("No features present.. Only identity features will be used.")
         feats = None

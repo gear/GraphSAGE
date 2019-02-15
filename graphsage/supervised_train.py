@@ -33,6 +33,7 @@ flags.DEFINE_string('model', 'graphsage_mean', 'model names. See README for poss
 flags.DEFINE_float('learning_rate', 0.01, 'initial learning rate.')
 flags.DEFINE_string("model_size", "small", "Can be big or small; model specific def'ns")
 flags.DEFINE_string('train_prefix', '', 'prefix identifying training data. must be specified.')
+flags.DEFINE_string('feats_suffix', '', 'suffing identifying which feature set to use. Optional.')
 
 # left to default values in main experiments 
 flags.DEFINE_integer('epochs', 10, 'number of epochs to train.')
@@ -332,7 +333,7 @@ def train(train_data, test_data=None):
 
 def main(argv=None):
     print("Loading training data..")
-    train_data = load_data(FLAGS.train_prefix)
+    train_data = load_data(FLAGS.train_prefix, feats_suf=FLAGS.feats_suffix)
     print("Done loading training data..")
     train(train_data)
 
