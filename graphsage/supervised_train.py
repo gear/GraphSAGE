@@ -321,13 +321,13 @@ def train(train_data, test_data=None):
                   "f1_micro=", "{:.5f}".format(val_f1_mic),
                   "f1_macro=", "{:.5f}".format(val_f1_mac),
                   "time=", "{:.5f}".format(duration))
-    with open(log_dir() + "val_stats.txt", "w") as fp:
+    with open(log_dir() + FLAGS.feats_suffix+"val_stats.txt", "w") as fp:
         fp.write("loss={:.5f} f1_micro={:.5f} f1_macro={:.5f} time={:.5f}".
                 format(val_cost, val_f1_mic, val_f1_mac, duration))
 
     print("Writing test set stats to file (don't peak!)")
     val_cost, val_f1_mic, val_f1_mac, duration = incremental_evaluate(sess, model, minibatch, FLAGS.batch_size, test=True)
-    with open(log_dir() + "test_stats.txt", "w") as fp:
+    with open(log_dir() + FLAGS.feats_suffix+"test_stats.txt", "w") as fp:
         fp.write("loss={:.5f} f1_micro={:.5f} f1_macro={:.5f}".
                 format(val_cost, val_f1_mic, val_f1_mac))
 
