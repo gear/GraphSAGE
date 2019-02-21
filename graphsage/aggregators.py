@@ -384,6 +384,8 @@ class SeqAggregator(Layer):
             hidden_dim = self.hidden_dim = 128
         elif model_size == "big":
             hidden_dim = self.hidden_dim = 256
+        else:
+            raise NotImplementedError("Select 'small' or 'big' for model size.")
 
         with tf.variable_scope(self.name + name + '_vars'):
             self.vars['neigh_weights'] = glorot([hidden_dim, output_dim],
