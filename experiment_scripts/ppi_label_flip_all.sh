@@ -7,7 +7,7 @@ for i in $(seq 0.05 0.05 0.95)
 do
     i=$(echo $i | sed 's/0*$//') 
     echo ==== Noise rate $i ====
-    python -m graphsage.supervised_train \
+    python -W ignore -m graphsage.supervised_train \
               --train_prefix ~/data/ppi/ppi \
               --model graphsage_maxpool \
               --model_size small \
