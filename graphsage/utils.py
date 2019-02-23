@@ -16,7 +16,22 @@ minor = version_info[1]
 WALK_LEN=5
 N_WALKS=50
 
-def load_data(prefix, feats_suf, normalize=True, load_walks=False):
+def random_flip(class_map, G, ratio=0.1):
+    for n in G.nodes():
+        if G.node[n]['val'] == False and G.node[n]['test'] == False:
+            feat = class_map[n]
+            for i, v in enumerate(feat):
+                if np.random.random() < ratio:
+                    feat[i] = 1 - v
+            class_map[n] = feat
+    return class_map
+            
+
+def load_data(prefix, feats_suf, 
+              normalize=True, 
+              load_walks=False, 
+              corrupt_label=None):
+    # corrupt_label - Function to corrupt the labels of training data
     G_data = json.load(open(prefix + "-G.json"))
     G = json_graph.node_link_graph(G_data)
     if isinstance(G.nodes()[0], int):
@@ -42,6 +57,8 @@ def load_data(prefix, feats_suf, normalize=True, load_walks=False):
         lab_conversion = lambda n : int(n)
 
     class_map = {conversion(k):lab_conversion(v) for k,v in class_map.items()}
+    if corrupt_label is not None:
+        class_map = corrupt_label(class_map, G)
 
     ## Remove all nodes that do not have val/test annotations
     ## (necessary because of networkx weirdness with the Reddit data)
@@ -82,9 +99,9 @@ def run_random_walks(G, nodes, num_walks=N_WALKS):
     for count, node in enumerate(nodes):
         if G.degree(node) == 0:
             continue
-        for i in range(num_walks):
+        for _ in range(num_walks):
             curr_node = node
-            for j in range(WALK_LEN):
+            for _ in range(WALK_LEN):
                 next_node = random.choice(G.neighbors(curr_node))
                 # self co-occurrences are useless
                 if curr_node != node:

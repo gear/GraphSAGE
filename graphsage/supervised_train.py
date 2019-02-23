@@ -12,7 +12,7 @@ from graphsage.supervised_models import SupervisedGraphsage
 from graphsage.models import SAGEInfo
 from graphsage.minibatch import NodeMinibatchIterator
 from graphsage.neigh_samplers import UniformNeighborSampler
-from graphsage.utils import load_data
+from graphsage.utils import load_data, random_flip
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
@@ -33,7 +33,8 @@ flags.DEFINE_string('model', 'graphsage_mean', 'model names. See README for poss
 flags.DEFINE_float('learning_rate', 0.01, 'initial learning rate.')
 flags.DEFINE_string("model_size", "small", "Can be big or small; model specific def'ns")
 flags.DEFINE_string('train_prefix', '', 'prefix identifying training data. must be specified.')
-flags.DEFINE_string('feats_suffix', '', 'suffing identifying which feature set to use. Optional.')
+flags.DEFINE_string('feats_suffix', '', 'suffix identifying which feature set to use. Optional.')
+flags.DEFINE_float('label_flip', 0.0, 'ratio of random label flip.')
 
 # left to default values in main experiments 
 flags.DEFINE_integer('epochs', 10, 'number of epochs to train.')
@@ -333,7 +334,10 @@ def train(train_data, test_data=None):
 
 def main(argv=None):
     print("Loading training data..")
-    train_data = load_data(FLAGS.train_prefix, feats_suf=FLAGS.feats_suffix)
+    if FLAGS.label_flip > 0:
+        train_data = load_data(FLAGS.train_prefix, 
+                               feats_suf=FLAGS.feats_suffix, 
+                               corrupt_label=lambda l, g: random_flip(l, g, FLAGS.label_flip))
     print("Done loading training data..")
     train(train_data)
 
