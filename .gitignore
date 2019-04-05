@@ -107,4 +107,5 @@ ENV/
 *.pickle
 *.pkl
 
-/sup-*
+sup-*/
+unsup-*/
