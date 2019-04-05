@@ -59,6 +59,14 @@ flags.DEFINE_integer('gpu', 0, "which gpu to use.")
 flags.DEFINE_integer('print_every', 5, "How often to print training info.")
 flags.DEFINE_integer('max_total_steps', 10**10, "Maximum total number of iterations")
 
+# Use gaussian feature instead
+flags.DEFINE_boolean('gaussian_feat', False, 
+                     'Whether to use gaussian as feature')
+flags.DEFINE_float('gaussian_mean', -1.0, 
+                   "Mean of a gaussian to use as feature")
+flags.DEFINE_float('gaussian_std', 1.0,
+                   "Standard deviation of the gaussian dist.")
+
 os.environ["CUDA_VISIBLE_DEVICES"]=str(FLAGS.gpu)
 
 GPU_MEM_FRACTION = 0.8
@@ -136,6 +144,12 @@ def train(train_data, test_data=None):
     if not features is None:
         # pad with dummy zero vector
         features = np.vstack([features, np.zeros((features.shape[1],))])
+
+    if FLAGS.gaussian_feat:
+        features = np.random.normal(FLAGS.gaussian_mean,
+                                    FLAGS.gaussian_std,
+                                    features.shape)
+        print("Using Gaussian features.")
 
     context_pairs = train_data[3] if FLAGS.random_context else None
     placeholders = construct_placeholders(num_classes)
@@ -338,6 +352,9 @@ def main(argv=None):
         train_data = load_data(FLAGS.train_prefix, 
                                feats_suf=FLAGS.feats_suffix, 
                                corrupt_label=lambda l, g: random_flip(l, g, FLAGS.label_flip))
+    else:
+        train_data = load_data(FLAGS.train_prefix, 
+                               feats_suf=FLAGS.feats_suffix)
     print("Done loading training data..")
     train(train_data)
 
