@@ -252,11 +252,13 @@ class SampleAndAggregate(GeneralizedModel):
         self.build()
 
     def sample(self, inputs, layer_infos, batch_size=None):
-        """ Sample neighbors to be the supportive fields for multi-layer convolutions.
+        """ Sample neighbors to be the supportive fields for multi-layer 
+            convolutions.
 
         Args:
             inputs: batch inputs
-            batch_size: the number of inputs (different for batch inputs and negative samples).
+            batch_size: the number of inputs 
+                        (different for batch inputs and negative samples).
         """
         
         if batch_size is None:
@@ -275,19 +277,25 @@ class SampleAndAggregate(GeneralizedModel):
         return samples, support_sizes
 
 
-    def aggregate(self, samples, input_features, dims, num_samples, support_sizes, batch_size=None,
-            aggregators=None, name=None, concat=False, model_size="small"):
-        """ At each layer, aggregate hidden representations of neighbors to compute the hidden representations 
-            at next layer.
+    def aggregate(self, samples, input_features, dims, num_samples, 
+                  support_sizes, batch_size=None, aggregators=None, 
+                  name=None, concat=False, model_size="small"):
+        """ At each layer, aggregate hidden representations of neighbors 
+            to compute the hidden representations at next layer.
         Args:
-            samples: a list of samples of variable hops away for convolving at each layer of the
-                network. Length is the number of layers + 1. Each is a vector of node indices.
-            input_features: the input features for each sample of various hops away.
-            dims: a list of dimensions of the hidden representations from the input layer to the
-                final layer. Length is the number of layers + 1.
+            samples: a list of samples of variable hops away for 
+                     convolving at each layer of the network. Length is the 
+                     number of layers + 1. Each is a vector of node indices.
+            input_features: the input features for each sample of 
+                            various hops away.
+            dims: a list of dimensions of the hidden representations from 
+                  the input layer to the final layer. Length is the number 
+                  of layers + 1.
             num_samples: list of number of samples for each layer.
-            support_sizes: the number of nodes to gather information from for each layer.
-            batch_size: the number of inputs (different for batch inputs and negative samples).
+            support_sizes: the number of nodes to gather information 
+                           from for each layer.
+            batch_size: the number of inputs 
+                        (different for batch inputs and negative samples).
         Returns:
             The hidden representation at the final layer for all nodes in batch
         """

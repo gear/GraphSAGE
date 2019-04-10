@@ -27,7 +27,7 @@ def random_flip(class_map, G, ratio=0.1):
     return class_map
             
 
-def load_data(prefix, feats_suf, 
+def load_data(prefix, feats_suf="", 
               normalize=True, 
               load_walks=False, 
               corrupt_label=None):

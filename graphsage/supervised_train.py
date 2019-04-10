@@ -10,7 +10,7 @@ from sklearn import metrics
 
 from graphsage.supervised_models import SupervisedGraphsage
 from graphsage.models import SAGEInfo
-from graphsage.minibatch import NodeMinibatchIterator
+from graphsage.minibatch import NodeMinibatchIterator, ERMinibatchIterator
 from graphsage.neigh_samplers import UniformNeighborSampler
 from graphsage.utils import load_data, random_flip
 
@@ -67,6 +67,10 @@ flags.DEFINE_float('gaussian_mean', -1.0,
 flags.DEFINE_float('gaussian_std', 1.0,
                    "Standard deviation of the gaussian dist.")
 
+# Use random graph structure 
+flags.DEFINE_boolean('er_graph', False,
+                     'Whether to use random graph structure')
+
 os.environ["CUDA_VISIBLE_DEVICES"]=str(FLAGS.gpu)
 
 GPU_MEM_FRACTION = 0.8
@@ -78,7 +82,8 @@ def calc_f1(y_true, y_pred):
     else:
         y_pred[y_pred > 0.5] = 1
         y_pred[y_pred <= 0.5] = 0
-    return metrics.f1_score(y_true, y_pred, average="micro"), metrics.f1_score(y_true, y_pred, average="macro")
+    return metrics.f1_score(y_true, y_pred, average="micro"),\
+           metrics.f1_score(y_true, y_pred, average="macro")
 
 # Define model evaluation function
 def evaluate(sess, model, minibatch_iter, size=None):
@@ -153,14 +158,24 @@ def train(train_data, test_data=None):
 
     context_pairs = train_data[3] if FLAGS.random_context else None
     placeholders = construct_placeholders(num_classes)
-    minibatch = NodeMinibatchIterator(G, 
-            id_map,
-            placeholders, 
-            class_map,
-            num_classes,
-            batch_size=FLAGS.batch_size,
-            max_degree=FLAGS.max_degree, 
-            context_pairs = context_pairs)
+    if FLAGS.er_graph:
+        minibatch = ERMinibatchIterator(G, 
+                id_map,
+                placeholders, 
+                class_map,
+                num_classes,
+                batch_size=FLAGS.batch_size,
+                max_degree=FLAGS.max_degree, 
+                context_pairs = context_pairs)
+    else:
+        minibatch = NodeMinibatchIterator(G, 
+                id_map,
+                placeholders, 
+                class_map,
+                num_classes,
+                batch_size=FLAGS.batch_size,
+                max_degree=FLAGS.max_degree, 
+                context_pairs = context_pairs)
     adj_info_ph = tf.placeholder(tf.int32, shape=minibatch.adj.shape)
     adj_info = tf.Variable(adj_info_ph, trainable=False, name="adj_info")
 

@@ -318,3 +318,54 @@ class NodeMinibatchIterator(object):
         """
         self.train_nodes = np.random.permutation(self.train_nodes)
         self.batch_num = 0
+
+
+class ERMinibatchIterator(NodeMinibatchIterator):
+    
+    """ 
+    This minibatch iterator iterates over nodes in the graph but ignore the 
+    graph's structure.
+
+    G -- networkx graph (original)
+    id2idx -- dict mapping node ids to integer values indexing feature tensor
+    placeholders -- standard tensorflow placeholders object for feeding
+    label_map -- map from node ids to class values (integer or list)
+    num_classes -- number of output classes
+    batch_size -- size of the minibatches
+    max_degree -- maximum size of the downsampled adjacency lists
+    """
+    def construct_adj(self):
+        adj = len(self.id2idx)*np.ones((len(self.id2idx)+1, self.max_degree))
+        deg = np.zeros((len(self.id2idx),))
+        for nodeid in self.G.nodes():
+            if self.G.node[nodeid]['test'] or self.G.node[nodeid]['val']:
+                continue
+            neighbors = np.array([self.id2idx[neighbor] \
+                            for neighbor in np.random.choice(self.G.nodes(),\
+                                                             self.max_degree,\
+                                                             replace=True)])
+            deg[self.id2idx[nodeid]] = len(neighbors)
+            if len(neighbors) == 0:
+                continue
+            if len(neighbors) < self.max_degree:
+                neighbors = np.random.choice(neighbors,
+                                             self.max_degree,
+                                             replace=True)
+            adj[self.id2idx[nodeid], :] = neighbors
+        return adj, deg
+
+    def construct_test_adj(self):
+        adj = len(self.id2idx)*np.ones((len(self.id2idx)+1, self.max_degree))
+        for nodeid in self.G.nodes():
+            neighbors = np.array([self.id2idx[neighbor] \
+                          for neighbor in np.random.choice(self.G.nodes(),\
+                                                           self.max_degree,\
+                                                           replace=True)])
+            if len(neighbors) == 0:
+                continue
+            if len(neighbors) < self.max_degree:
+                neighbors = np.random.choice(neighbors,
+                                             self.max_degree,
+                                             replace=True)
+            adj[self.id2idx[nodeid], :] = neighbors
+        return adj
