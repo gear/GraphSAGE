@@ -30,25 +30,38 @@ class FeaturesOnlyDataset(Dataset):
         """
         data = gs_load_data(prefix)
         G, feats, id_map, _, class_map = data
-        self.num_samples = len(id_map)
-        self.train_idx = []
-        self.val_idx = []
-        self.test_idx = []
-        class_sample_val = class_map.itervalues().next()
-        if isinstance(class_sample_val, list):
-            self.labels = np.zeros((self.num_samples, len(class_sample_val)))
-        else:
-            self.labels = np.zeros((self.num_samples, 1))
+
+        train_X, train_y = [], []
+        test_X, test_y = [], []
+        val_X, val_y = [], []
+
         for nodeid in G.nodes():
-            self.labels[id_map[nodeid]] = class_map[nodeid]
+            idx = id_map[nodeid]
+            c = class_map[nodeid]
             if G.node[nodeid]['test']:
-                self.test_idx.append(id_map[nodeid])
+                test_X.append(feats[idx])
+                test_y.append(c)
             elif G.node[nodeid]['val']:
-                self.val_idx.append(id_map[nodeid])
+                val_X.append(feats[idx])
+                val_y.append(c)
             else:
-                self.train_idx.append(id_map[nodeid])
-        self.X = np.array(feats, dtype=np.float32)
-        self.labels = np.array(self.labels, dtype=np.long)
+                train_X.append(feats[idx])
+                train_y.append(c)
+
+        self.train_offset, self.train_len = 0, len(train_X)
+        self.val_offset, self.val_len = len(train_X), len(val_X)
+        self.test_offset, self.test_len = len(train_X)+len(val_X), len(test_X)
+
+        train_X = torch.Tensor(train_X).float()
+        val_X = torch.Tensor(val_X).float()
+        test_X = torch.Tensor(test_X).float()
+        train_y = torch.Tensor(train_y).long()
+        val_y = torch.Tensor(val_y).long()
+        test_y = torch.Tensor(test_y).long()
+
+        self.X = torch.cat([train_X, val_X, test_X], 0)
+        self.y = torch.cat([train_y, val_y, test_y], 0)
+
         self.transforms = transforms
 
     def __getitem__(self, index):
