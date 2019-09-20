@@ -1,6 +1,7 @@
 #!/bin/bash
 
 python -m graphsage.supervised_train \
-          --train_prefix ~/data/cora_gcn/cora \
+          --train_prefix high/freq \
+          --high_freq 0.5 \
           --model graphsage_seq --sigmoid \
-          --epochs 100
+          --epochs 200

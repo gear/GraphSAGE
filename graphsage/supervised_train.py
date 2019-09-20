@@ -12,7 +12,7 @@ from graphsage.supervised_models import SupervisedGraphsage
 from graphsage.models import SAGEInfo
 from graphsage.minibatch import NodeMinibatchIterator, ERMinibatchIterator
 from graphsage.neigh_samplers import UniformNeighborSampler
-from graphsage.utils import load_data, random_flip
+from graphsage.utils import load_data, random_flip, load_data_highfreq
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
@@ -70,6 +70,9 @@ flags.DEFINE_float('gaussian_std', 1.0,
 # Use random graph structure 
 flags.DEFINE_boolean('er_graph', False,
                      'Whether to use random graph structure')
+
+# Use high frequency 
+flags.DEFINE_boolean('high_freq', False, 'Gen high freq labels')
 
 os.environ["CUDA_VISIBLE_DEVICES"]=str(FLAGS.gpu)
 
@@ -367,6 +370,8 @@ def main(argv=None):
         train_data = load_data(FLAGS.train_prefix, 
                                feats_suf=FLAGS.feats_suffix, 
                                corrupt_label=lambda l, g: random_flip(l, g, FLAGS.label_flip))
+    elif FLAGS.high_freq:
+        train_data = load_data_highfreq()
     else:
         train_data = load_data(FLAGS.train_prefix, 
                                feats_suf=FLAGS.feats_suffix)
